@@ -1,29 +1,10 @@
 const request = require('supertest')
 const app = require('../src/app')
-const mongoose = require('mongoose')
-const jwt = require('jsonwebtoken')
-
 const User = require("../src/models/user")
+const { userOneId, userOne, setupDatabase} = require('./fixtures/db')
 
 
-const userOneId = new mongoose.Types.ObjectId()
-
-const userOne = {
-    _id : userOneId,
-    name : "sashotti",
-    email: "sashotti@example.com",
-    password: "wertyu98h489ure32",
-    tokens : [{
-        token: jwt.sign({_id : userOneId} , process.env.JWT_SECRET)
-    }]
-    
-}
-beforeEach(async () => {
-    // the deleteMany will delete everything because I didn't give it any argument
-   await  User.deleteMany()
-   // a user can be necessary for login and so on
-   await new User(userOne).save()
-})
+beforeEach(setupDatabase)
 
 // after each exists, but we don't need it in this project
 // afterEach(() => {
@@ -33,8 +14,8 @@ beforeEach(async () => {
 test('Should signup a new user', async () => {
     // here we can use patch, delete, get and so on
     const response = await request(app).post('/users').send({
-        name : 'Sasha',
-        email: "sasha@example.com",
+        name : 'Sashimi',
+        email: "sashimi@example.com",
         password: 'MyPass89898!'
     }).expect(201)
 
@@ -47,8 +28,8 @@ test('Should signup a new user', async () => {
     // Assertion about the response
     expect(response.body).toMatchObject({
         user: {
-            name: 'Sasha',
-            email: 'sasha@example.com',
+            name: 'Sashimi',
+            email: 'sashimi@example.com',
         },
         token: user.tokens[0].token,
     })
@@ -109,4 +90,50 @@ test("Should not delete account for unauthenticated user", async () => {
     await request(app).delete('/users/me')
     .send()
     .expect(401)
+})
+
+test('Should upload avatar image', async () => {
+    //create a new directory in the tests folder--> fixtures
+    await request(app)
+        .post('/users/me/avatar')
+        .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+        //attach the avatar field
+        //attach is provided by supertest in order to attach files 
+        .attach('avatar', 'tests/fixtures/profile-pic.jpg')
+        .expect(200)
+
+    const user = await User.findById(userOneId)
+    //expect({}).toBe({})
+    //we want to check if it's buffer
+    expect(user.avatar).toEqual(expect.any(Buffer))
+
+    //to be uses the === triple equality operator of javascript
+    // 1 === 1 
+    // {} is not === {} objects are not strictly equals in this case, these are 
+    // infact, two different objects, even thoudh they have the same properties. 
+    // we can switch to .toEqual
+})
+
+test('Should update valid user fields', async () => {
+    const response = await request(app)
+                           .patch("/users/me")
+                           .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+                           .send({
+                               name: "Dr Sashotti"
+                           })
+                           .expect(200)
+
+    const user = await User.findById(userOneId)
+    expect(user.name).toBe("Dr Sashotti")
+
+})
+
+test('Should not update valid user fields', async () => {
+    const response = await request(app)
+                           .patch("/users/me")
+                           .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+                           .send({
+                               cat: "Dr Sashotti"
+                           })
+                           .expect(400)
 })

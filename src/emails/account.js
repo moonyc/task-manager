@@ -11,9 +11,8 @@ const sendWelcomeEmail = (email, name) => {
         to: email,
         from: 'sashimifrufru@gmail.com',
         subject: 'Thanks for joining in!',
-        //we can use this syntax only in ``command + 9
         text: `Welcome to the app, ${name}. Let me know how you get along with the app.`,
-        html: '<h1>Gattino saluta </h1>'
+        html: '<h1>Gattino saluta </h1>',
     })
 }
 

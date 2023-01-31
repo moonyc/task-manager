@@ -196,7 +196,7 @@ const upload = multer({
 })
 
 //2 configure router
-router.post('/user/me/avatar', auth, upload.single('avatar'), async (req,res) => {
+router.post('/users/me/avatar', auth, upload.single('avatar'), async (req,res) => {
    const buffer = await sharp(req.file.buffer).resize({width: 250 }).png().toBuffer()
    req.user.avatar = buffer
     await req.user.save()

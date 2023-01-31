@@ -22,7 +22,6 @@ const userSchema = new mongoose.Schema({
     },
 
     email: {
-        /*I store the email in value, that is the argument passed in validate(), after that, i can pass it into the isEmail() method */
         type: String,
         unique: true,
         required: true,
@@ -55,7 +54,7 @@ const userSchema = new mongoose.Schema({
     }
 
 }, {
-    //anytime we create a new user there will be the fields: created at and updated at.
+    
     timestamps: true,
 
 })

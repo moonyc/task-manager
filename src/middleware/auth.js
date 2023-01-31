@@ -11,7 +11,7 @@ const auth = async (req, res, next) => {
            //this will trigger catch down below
            throw new Error()
        }
-       //i don't want to fatch the user again in the router:
+       //i don't want to fetch the user again in the router:
        req.token = token
        req.user = user 
        next()
